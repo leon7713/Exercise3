@@ -3,6 +3,8 @@ using System.Xml.Serialization;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using System.Threading;
+using Windows.UI.Core;
+using System;
 
 namespace Exercise3
 {
@@ -19,20 +21,21 @@ namespace Exercise3
 
       private void LoadBTN_click(object sender, RoutedEventArgs e)
       {
-         //ThreadPool.QueueUserWorkItem(LoadProcess);
-         UserDetails userData = serialization.DeserializeData();
-         IdTB.Text = userData.Id.ToString();
-         NameTB.Text = userData.FullName;
-         AddressTB.Text = userData.Address;
+         ThreadPool.QueueUserWorkItem(LoadProcess);
       }
 
       private void SaveBTN_click(object sender, RoutedEventArgs e)
       {
-         UserDetails userDetails = new UserDetails(int.Parse(IdTB.Text), NameTB.Text, AddressTB.Text);
-         ThreadPool.QueueUserWorkItem(SaveProcess, userDetails);
-         IdTB.Text = string.Empty;
-         NameTB.Text = string.Empty;
-         AddressTB.Text = string.Empty;
+         if (IdTB.Text != string.Empty && NameTB.Text != string.Empty && AddressTB.Text != string.Empty)
+         {
+            UserDetails userDetails = new UserDetails(int.Parse(IdTB.Text), NameTB.Text, AddressTB.Text);
+            if (ThreadPool.QueueUserWorkItem(SaveProcess, userDetails))
+            {
+               IdTB.Text = string.Empty;
+               NameTB.Text = string.Empty;
+               AddressTB.Text = string.Empty;
+            } 
+         }
       }
 
       public void SaveProcess(object callback)
@@ -43,9 +46,13 @@ namespace Exercise3
       public void LoadProcess(object callback)
       {
          UserDetails userData = serialization.DeserializeData();
-         //IdTB.Text = userData.Id.ToString();
-         //NameTB.Text = userData.FullName;
-         //AddressTB.Text = userData.Address;
+
+         var ignored = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+         {
+            IdTB.Text = userData.Id.ToString();
+            NameTB.Text = userData.FullName;
+            AddressTB.Text = userData.Address;
+         });
       }
    }
 
@@ -72,6 +79,7 @@ namespace Exercise3
       //data members
       FileStream stream;
       XmlSerializer xmlSerializer;
+      private static readonly object locker = new object();
 
       //c'tor
       public SerializationUD()
@@ -82,22 +90,29 @@ namespace Exercise3
       //methods
       internal void SerializeData(UserDetails userDetails)
       {
-         using (stream = new FileStream($@"{Windows.Storage.ApplicationData.Current.LocalFolder.Path}\UserDetails.xml",
-            FileMode.Create))
+         lock (locker)
          {
-            //Thread.Sleep(5000);
-            xmlSerializer.Serialize(stream, userDetails);
+            using (stream = new FileStream($@"{Windows.Storage.ApplicationData.Current.LocalFolder.Path}\UserDetails.xml",
+               FileMode.Create))
+            {
+               Thread.Sleep(5000);
+               xmlSerializer.Serialize(stream, userDetails);
+            }
          }
       }
 
 
       internal UserDetails DeserializeData()
       {
-         using (stream = new FileStream($@"{Windows.Storage.ApplicationData.Current.LocalFolder.Path}\UserDetails.xml",
-            FileMode.OpenOrCreate))
+         lock (locker)
          {
-            UserDetails userDetails = (UserDetails)xmlSerializer.Deserialize(stream);
-            return userDetails;
+            using (stream = new FileStream($@"{Windows.Storage.ApplicationData.Current.LocalFolder.Path}\UserDetails.xml",
+               FileMode.OpenOrCreate))
+            {
+               Thread.Sleep(5000);
+               UserDetails userDetails = (UserDetails)xmlSerializer.Deserialize(stream);
+               return userDetails;
+            }
          }
       }
    }
