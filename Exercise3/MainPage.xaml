@@ -11,19 +11,19 @@
    <StackPanel Margin="200, 200">
       <StackPanel Orientation="Horizontal">
          <TextBlock Text="ID:" HorizontalAlignment="Center" FontSize="40"/>
-         <TextBox Width="300" Height="50" BorderBrush="Black" FontSize="30" Margin="110, 10"/>
+         <TextBox x:Name="IdTB" Width="300" Height="50" BorderBrush="Black" FontSize="30" Margin="110, 10"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal">
          <TextBlock Text="Name:" HorizontalAlignment="Center" FontSize="40"/>
-         <TextBox Width="300" Height="50" BorderBrush="Black" FontSize="25" Margin="45, 10"/>
+         <TextBox x:Name="NameTB" Width="300" Height="50" BorderBrush="Black" FontSize="25" Margin="45, 10"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal">
          <TextBlock Text="Address:" HorizontalAlignment="Center" FontSize="40"/>
-         <TextBox Width="300" Height="50" BorderBrush="Black" FontSize="25" Margin="10, 10"/>
+         <TextBox x:Name="AddressTB" Width="300" Height="50" BorderBrush="Black" FontSize="25" Margin="10, 10"/>
       </StackPanel>
       <StackPanel Orientation="Horizontal">
-         <Button Content="Load" FontSize="30" Margin="100, 50"/>
-         <Button Content="Save" FontSize="30" Margin="0, 50"/>
+         <Button x:Name="LoadBTN" Content="Load" FontSize="30" Margin="100, 50" Click="LoadBTN_click"/>
+         <Button x:Name="SaveBTN" Content="Save" FontSize="30" Margin="0, 50" Click="SaveBTN_click"/>
       </StackPanel>
    </StackPanel>
 </Page>
